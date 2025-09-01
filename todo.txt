@@ -1,0 +1,12 @@
+add api key in .env
+
+add summaries in ragtest/input folder
+
+run the following command to build the graph
+graphrag index --root ./ragtest
+
+run the following command to query (change local to global to ask a more generic question)
+graphrag query \
+--root ./ragtest \
+--method local \
+--query "What are the top themes in this story?"
