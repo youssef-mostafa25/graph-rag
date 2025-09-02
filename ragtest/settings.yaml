@@ -13,10 +13,11 @@ models:
     api_key: ${GRAPHRAG_API_KEY} # set this in the generated .env file
     # audience: "https://cognitiveservices.azure.com/.default"
     # organization: <organization_id>
-    model: gpt-4-turbo-preview
+    model: gpt-4o-mini # set to a valid OpenAI model available to your key
     # deployment_name: <azure_model_deployment_name>
     # encoding_model: cl100k_base # automatically set by tiktoken if left undefined
     model_supports_json: true # recommended if this is available for your model.
+    max_output_tokens: 1024 # ensure non-null for providers requiring explicit tokens
     concurrent_requests: 25 # max number of simultaneous LLM requests allowed
     async_mode: threaded # or asyncio
     retry_strategy: native
