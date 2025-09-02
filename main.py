@@ -1,12 +1,39 @@
-from pathlib import Path
+import os
 import asyncio
-from graphrag.config.load_config import load_config
-from graphrag.index import InMemoryIndex
-from graphrag.query import QueryEngine
 from langchain_core.documents import Document
+from langchain_google_genai import GoogleGenerativeAIEmbeddings
+from langchain_google_genai import ChatGoogleGenerativeAI
+from graphrag.index import GraphRAGIndexer
+from graphrag.query import GraphRAGQueryPipeline
 
-PROJECT_DIR = "@/ragtest"  # Your project root
-graphrag_config = load_config(Path(PROJECT_DIR))
+google_api_key = os.getenv["GOOGLE_API_KEY"]
+OUTPUT_DIR = "@/output"  # 
+
+# Initialize embeddings with Gemini
+embeddings = GoogleGenerativeAIEmbeddings(
+    model="models/embedding-001",   # Gemini embedding model
+    google_api_key=google_api_key
+)
+
+# Initialize LLM with Gemini
+llm = ChatGoogleGenerativeAI(
+    model="gemini-1.5-pro",         # Gemini chat/LLM model
+    google_api_key=google_api_key
+)
+
+# Initialize the indexer
+indexer = GraphRAGIndexer(
+    llm=llm,
+    embeddings=embeddings,
+    storage_path=OUTPUT_DIR  # where the graph + vectors will be persisted
+)
+
+# Initialize the query pipeline
+query_pipeline = GraphRAGQueryPipeline(
+    llm=llm,
+    embeddings=embeddings,
+    storage_path=OUTPUT_DIR   # must match the indexer’s path
+)
 
 # Refactor the langchain docs to graphrag jsonl
 def refactor_langchain_docs_to_graphrag_jsonl(docs: list[Document]) -> list[Document]:
@@ -19,28 +46,15 @@ def refactor_langchain_docs_to_graphrag_jsonl(docs: list[Document]) -> list[Docu
 # Build the index
 async def build_index(docs: list[Document]):
     try:
-        index = InMemoryIndex()
-        index.add_documents(docs)
-        index.save(graphrag_config.project.paths.output)
+        indexer.index(docs)
+        print("Index built successfully")
     except Exception as e:
         print(f"Error building index: {e}")
         raise e
 
-# Load the index
-async def load_index() -> InMemoryIndex:
-    index = InMemoryIndex()
-    index.load(graphrag_config.project.paths.output)
-    return index
-
-# Get the engine
-async def get_engine() -> QueryEngine:
-    index = await load_index()
-    engine = QueryEngine(index, graphrag_config)
-    return engine
-
 # Query the index
-def query(user_input: str, engine: QueryEngine):
-    return engine.query(user_input)
+def query(user_input: str):
+    return query_pipeline.query(user_input)
 
 if __name__ == "__main__":
     # langchain docs
@@ -68,7 +82,7 @@ if __name__ == "__main__":
     ]
 
     refactored_summaries = refactor_langchain_docs_to_graphrag_jsonl(summaries)
+
     asyncio.run(build_index(refactored_summaries))
 
-    engine = asyncio.run(get_engine())
-    asyncio.run(query(user_input="What are the top themes in this story?", engine=engine))
+    asyncio.run(query(user_input="What are the top themes in this story?"))
