@@ -3,8 +3,7 @@ import asyncio
 from langchain_core.documents import Document
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain_google_genai import ChatGoogleGenerativeAI
-from graphrag.index import GraphRAGIndexer
-from graphrag.query import GraphRAGQueryPipeline
+from langchain.retrievers.graph_rag import GraphRAGIndexer, GraphRAGRetriever
 
 google_api_key = os.getenv["GOOGLE_API_KEY"]
 OUTPUT_DIR = "@/output"  # 
@@ -28,25 +27,14 @@ indexer = GraphRAGIndexer(
     storage_path=OUTPUT_DIR  # where the graph + vectors will be persisted
 )
 
-# Initialize the query pipeline
-query_pipeline = GraphRAGQueryPipeline(
-    llm=llm,
-    embeddings=embeddings,
-    storage_path=OUTPUT_DIR   # must match the indexer’s path
-)
-
-# Refactor the langchain docs to graphrag jsonl
-def refactor_langchain_docs_to_graphrag_jsonl(docs: list[Document]) -> list[Document]:
-    refactored_docs = [
-    {"id": str(i), "text": doc.page_content, "metadata": doc.metadata}
-    for i, doc in enumerate(docs)
-    ]
-    return refactored_docs
+# Initialize the retriever
+retriever = GraphRAGRetriever(storage_path=OUTPUT_DIR)
 
 # Build the index
 async def build_index(docs: list[Document]):
     try:
-        indexer.index(docs)
+        indexer = GraphRAGIndexer(storage_path=OUTPUT_DIR)
+        indexer.add_documents(docs)
         print("Index built successfully")
     except Exception as e:
         print(f"Error building index: {e}")
@@ -54,7 +42,7 @@ async def build_index(docs: list[Document]):
 
 # Query the index
 def query(user_input: str):
-    return query_pipeline.query(user_input)
+    return retriever.invoke(user_input)
 
 if __name__ == "__main__":
     # langchain docs
@@ -81,8 +69,6 @@ if __name__ == "__main__":
         Document(page_content="GM has reported steady profits driven by high-margin trucks and SUVs, while scaling EV and software investments for long-term growth.", metadata={"id": "20"}),
     ]
 
-    refactored_summaries = refactor_langchain_docs_to_graphrag_jsonl(summaries)
-
-    asyncio.run(build_index(refactored_summaries))
+    asyncio.run(build_index(summaries))
 
     asyncio.run(query(user_input="What are the top themes in this story?"))
