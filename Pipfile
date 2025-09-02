@@ -5,6 +5,7 @@ name = "pypi"
 
 [packages]
 graphrag = "*"
+langchain-core = "*"
 
 [dev-packages]
 
