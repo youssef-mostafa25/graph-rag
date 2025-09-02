@@ -1,0 +1,85 @@
+# Python
+# ================================================
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.so
+
+# Distribution / packaging
+.Python
+build/
+dist/
+egg/
+*.egg-info/
+
+# Environments
+.venv
+venv/
+env/
+# Recursive .env ignoring for nested folders
+**/.env
+.env.*
+!.env.example
+
+# Common development files
+.DS_Store
+.vscode/
+.idea/
+.history/
+
+# Jupyter Notebook specific
+.ipynb_checkpoints/
+# Optional: Ignore Jupyter output, as it can be large and make diffs noisy.
+# *.ipynb
+# !notebooks/*.ipynb
+
+# RAG / AI Specific
+# ================================================
+# Vector store data
+# For vector search elements of the RAG pipeline.
+vectorstore/
+chroma.sqlite3
+faiss_index.bin
+db_collection/
+*.pkl
+*.bin
+
+# Large model files
+# Ignore downloaded model weights or other large files.
+models/
+model_weights/
+*.h5
+*.onnx
+*.safetensors
+
+# Graph RAG Specific
+# ================================================
+# Database-related files
+# Ignore files and directories created by local graph database instances.
+# Customize these based on the specific graph database you are using.
+# Neo4j:
+neo4j/
+neo4j_data/
+# Other common graph DB files (e.g., SQLite for testing)
+graph.db
+graph.storage
+*.graphml # Generated graph snapshots
+*.parquet # Generated data artifacts
+graph_output/
+
+# Extracted data and graph artifacts
+# Output from the indexing pipeline, which uses LLMs to extract entities.
+# Examples from Microsoft's GraphRAG:
+graphrag_index/
+graph_data/
+output/artifacts/
+
+# Logs and cache
+# ================================================
+logs/
+*.log
+.pytest_cache/
+.coverage
+htmlcov/
