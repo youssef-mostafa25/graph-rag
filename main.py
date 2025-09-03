@@ -16,14 +16,7 @@ async def build_index_from_files() -> None:
     for wf in index_results:
         print(f"Workflow: {wf.workflow}, Status: {'Error' if wf.errors else 'Success'}")
 
-
-# 2) Retrieve from the graph
-async def retrieve(user_query: str):
-    # Ensure index exists; build if missing
-    output_dir = OUTPUT_DIR
-    if not output_dir.exists() or not any(output_dir.iterdir()):
-        await build_index_from_files()
-
+async def basic_search(user_query: str):
     # Load required DataFrame(s) from index output
     text_units_path = OUTPUT_DIR / "text_units.parquet"
     text_units_df = pd.read_parquet(text_units_path)
@@ -34,10 +27,74 @@ async def retrieve(user_query: str):
         query=user_query,
     )
     print("Response:", context)
-    return context, response
 
+async def local_search(user_query: str):
+    # Load required DataFrames from index output
+    entities_df = pd.read_parquet(OUTPUT_DIR / "entities.parquet")
+    communities_df = pd.read_parquet(OUTPUT_DIR / "communities.parquet")
+    community_reports_df = pd.read_parquet(OUTPUT_DIR / "community_reports.parquet")
+    text_units_df = pd.read_parquet(OUTPUT_DIR / "text_units.parquet")
+    relationships_df = pd.read_parquet(OUTPUT_DIR / "relationships.parquet")
+    covariates_path = OUTPUT_DIR / "covariates.parquet"
+    covariates_df = pd.read_parquet(covariates_path) if covariates_path.exists() else None
+
+    context, response = await api.local_search(
+        config=graphrag_config,
+        entities=entities_df,
+        communities=communities_df,
+        community_reports=community_reports_df,
+        text_units=text_units_df,
+        relationships=relationships_df,
+        covariates=covariates_df,
+        community_level=1,  # You may want to make this configurable
+        response_type="text",  # You may want to make this configurable
+        query=user_query,
+    )
+    print("Response:", context)
+
+async def global_search(user_query: str):
+    # Load required DataFrames from index output
+    entities_df = pd.read_parquet(OUTPUT_DIR / "entities.parquet")
+    communities_df = pd.read_parquet(OUTPUT_DIR / "communities.parquet")
+    community_reports_df = pd.read_parquet(OUTPUT_DIR / "community_reports.parquet")
+
+    context, response = await api.global_search(
+        config=graphrag_config,
+        entities=entities_df,
+        communities=communities_df,
+        community_reports=community_reports_df,
+        community_level=1,  # You may want to make this configurable
+        dynamic_community_selection=False,  # You may want to make this configurable
+        response_type="text",  # You may want to make this configurable
+        query=user_query,
+    )
+    print("Response:", context)
+
+async def drift_search(user_query: str): # token limit reached
+    # Load required DataFrames from index output
+    entities_df = pd.read_parquet(OUTPUT_DIR / "entities.parquet")
+    communities_df = pd.read_parquet(OUTPUT_DIR / "communities.parquet")
+    community_reports_df = pd.read_parquet(OUTPUT_DIR / "community_reports.parquet")
+    text_units_df = pd.read_parquet(OUTPUT_DIR / "text_units.parquet")
+    relationships_df = pd.read_parquet(OUTPUT_DIR / "relationships.parquet")
+
+    context, response = await api.drift_search(
+        config=graphrag_config,
+        entities=entities_df,
+        communities=communities_df,
+        community_reports=community_reports_df,
+        text_units=text_units_df,
+        relationships=relationships_df,
+        community_level=1,  # You may want to make this configurable
+        response_type="text",  # You may want to make this configurable
+        query=user_query,
+    )
+    print("Response:", context)
 
 if __name__ == "__main__":
     # asyncio.run(build_index_from_files())
-    asyncio.run(retrieve("What are the top themes in this story?"))
+    asyncio.run(basic_search("What are the top themes in this story?"))
+    asyncio.run(local_search("What are the top themes in this story?"))
+    asyncio.run(global_search("What are the top themes in this story?"))
+    # asyncio.run(drift_search("What are the top themes in this story?"))
 
