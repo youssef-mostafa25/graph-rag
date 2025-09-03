@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "5ca4c1a9c27127d8885f1fde1bf38f79462f37c9367b58c4c1b19351ad95b0a1"
+            "sha256": "b61f5b98a63d3e5d0e00e6bbe3f9c5e737d7dbe0477111ce706509598c4aa761"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -117,6 +117,14 @@
             ],
             "markers": "python_version >= '3.8'",
             "version": "==12.26.0"
+        },
+        "backoff": {
+            "hashes": [
+                "sha256:03f829f5bb1923180821643f8753b0502c3b682293992485b0eef2807afa5cba",
+                "sha256:63579f9a0628e06278f7e47b7d7d5b6ce20dc65c5e96a6f3ca99a6adca0396e8"
+            ],
+            "markers": "python_version >= '3.7' and python_version < '4.0'",
+            "version": "==2.2.1"
         },
         "beartype": {
             "hashes": [
@@ -543,6 +551,14 @@
             "markers": "python_version >= '3.7'",
             "version": "==0.12.2"
         },
+        "diskcache": {
+            "hashes": [
+                "sha256:2c3a3fa2743d8535d832ec61c2054a1641f41775aa7c556758a109941e33e4fc",
+                "sha256:5e31b2d5fbad117cc363ebaf6b689474db18a1f6438bc82358b024abd4c2ca19"
+            ],
+            "markers": "python_version >= '3'",
+            "version": "==5.6.3"
+        },
         "distro": {
             "hashes": [
                 "sha256:2fa77c6fd8940f116ee1d6b94a2f90b13b5ea8d019b98bc8bafdcabcdd9bdbed",
@@ -682,6 +698,15 @@
             ],
             "markers": "python_version >= '3.8'",
             "version": "==4.3.3"
+        },
+        "graphiti-core": {
+            "hashes": [
+                "sha256:c52d0d9a23e674df2a609e2796346ae8fbe979d079db346539ce651ea8a56b2b",
+                "sha256:c9c0775afbefcb64f6ed3de6fad92baedff3d7be0bbadd2d928bac607f481720"
+            ],
+            "index": "pypi",
+            "markers": "python_version >= '3.10' and python_version < '4'",
+            "version": "==0.19.0"
         },
         "graphrag": {
             "hashes": [
@@ -1340,6 +1365,14 @@
             "markers": "python_version < '3.14' and python_version >= '3.6'",
             "version": "==1.0.13"
         },
+        "neo4j": {
+            "hashes": [
+                "sha256:5c53b5c3eee6dee7e920c9724391aa38d7135a651e71b766da00533b92a91a94",
+                "sha256:7d38e27e4f987a45cc9052500c6ee27325cb23dae6509037fe31dd7ddaed70c7"
+            ],
+            "markers": "python_version >= '3.7'",
+            "version": "==5.28.2"
+        },
         "networkx": {
             "hashes": [
                 "sha256:0030d386a9a06dee3565298b4a734b68589749a544acbb6c412dc9e2489ec6ec",
@@ -1427,11 +1460,11 @@
         },
         "openai": {
             "hashes": [
-                "sha256:2e0153bcd64a6523071e90211cbfca1f2bbc5ceedd0993ba932a5869f93b7fc9",
-                "sha256:d751a7e95e222b5325306362ad02a7aa96e1fab3ed05b5888ce1c7ca63451345"
+                "sha256:0148951da12ea651f890ef38f8adef75b78c053dba37ea2bdba857c8945860d4",
+                "sha256:9b582ead9dd208753f89dae8e36b6548c6ada076e87ba3db36630e29239661ab"
             ],
             "markers": "python_version >= '3.8'",
-            "version": "==1.102.0"
+            "version": "==1.104.2"
         },
         "orjson": {
             "hashes": [
@@ -1705,6 +1738,14 @@
             ],
             "markers": "python_version >= '3.9'",
             "version": "==11.3.0"
+        },
+        "posthog": {
+            "hashes": [
+                "sha256:1011ddda110b65e0d080f2a5f88eb0337547ed6b5a50d0f8f6191e9357b99434",
+                "sha256:57d9a891ddedf690d2b294bb8b7832095c149729a3f123f47b7bcaf7b2b6e1a0"
+            ],
+            "markers": "python_version >= '3.9'",
+            "version": "==6.7.1"
         },
         "pot": {
             "hashes": [
