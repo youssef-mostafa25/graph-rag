@@ -1,0 +1,30 @@
+[
+  {
+    "page_content": "Artificial Intelligence (AI) is the simulation of human intelligence processes by machines, especially computer systems.",
+    "metadata": {
+      "type": "definition",
+      "description": "A general definition of artificial intelligence."
+    }
+  },
+  {
+    "page_content": "Machine learning is a subset of AI focused on algorithms that learn from data without being explicitly programmed.",
+    "metadata": {
+      "type": "definition",
+      "description": "Explanation of machine learning as a subset of AI."
+    }
+  },
+  {
+    "page_content": "Neural networks are computational models inspired by the human brain, used widely in deep learning applications.",
+    "metadata": {
+      "type": "concept",
+      "description": "Overview of neural networks and their inspiration."
+    }
+  },
+  {
+    "page_content": "Natural Language Processing (NLP) enables computers to understand, interpret, and generate human language.",
+    "metadata": {
+      "type": "concept",
+      "description": "Introduction to NLP and its capabilities."
+    }
+  }
+]

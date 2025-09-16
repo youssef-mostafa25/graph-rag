@@ -8,11 +8,15 @@ from typing import List, Any
 
 from dotenv import load_dotenv
 
+from langchain_core.documents import Document
+
 from graphiti_core import Graphiti
 from graphiti_core.nodes import EpisodeType
 from graphiti_core.search.search_config_recipes import NODE_HYBRID_SEARCH_RRF
+from graphiti_core.llm_client.gemini_client import GeminiClient, LLMConfig
+from graphiti_core.embedder.gemini import GeminiEmbedder, GeminiEmbedderConfig
+from graphiti_core.cross_encoder.gemini_reranker_client import GeminiRerankerClient
 
-from langchain_core.documents import Document
 
 #################################################
 # CONFIGURATION
@@ -28,8 +32,6 @@ logging.basicConfig(
     datefmt='%Y-%m-%d %H:%M:%S',
 )
 logger = logging.getLogger(__name__)
-
-load_dotenv()
 
 # Neo4j connection parameters
 # Make sure Neo4j Desktop is running with a local DBMS started
@@ -49,7 +51,43 @@ if not neo4j_uri or not neo4j_user or not neo4j_password:
 #################################################
 
 # Initialize Graphiti with Neo4j connection
-graphiti = Graphiti(neo4j_uri, neo4j_user, neo4j_password)
+
+# Google API key configuration
+api_key = os.getenv('GOOGLE_API_KEY')
+
+# Initialize Graphiti with Gemini clients
+graphiti = Graphiti(
+    neo4j_uri, neo4j_user, neo4j_password,
+    # Initialize Gemini LLM client, embedder, and reranker
+    llm_client=GeminiClient(
+        config=LLMConfig(
+            api_key=api_key,
+            model="gemini-2.5-flash-lite"
+        )
+    ),
+    embedder=GeminiEmbedder(
+        config=GeminiEmbedderConfig(
+            api_key=api_key,
+            embedding_model="embedding-001"
+        )
+    ),
+    cross_encoder=GeminiRerankerClient(
+        config=LLMConfig(
+            api_key=api_key,
+            model="gemini-2.5-flash-lite"
+        )
+    )
+)
+
+def read_json_files_from_directory_and_convert_to_documents(directory: str) -> List[Document]:
+    raw_docs = {}
+    # Load dummy documents
+    for file in os.listdir(directory):
+        if file.endswith(".json"):
+            with open(os.path.join(directory, file)) as f:
+                raw_docs[file] = json.load(f)
+    docs = [Document(page_content=json.dumps(doc), metadata={"type": EpisodeType.json, "description": f"Document from {file_name}", "group_id": file_name}) for file_name, doc in raw_docs.items()]
+    return docs
 
 # Converter function: LangChain Document(s) -> Graphiti episode dicts
 def convert_langchain_documents_to_episodes(documents: List[Document]) -> List[dict]:
@@ -71,11 +109,12 @@ def convert_langchain_documents_to_episodes(documents: List[Document]) -> List[d
             'content': content,
             'type': episode_type,
             'description': doc.metadata.get('description', ''),
+            'group_id': doc.metadata.get('group_id', None),
         })
     return episodes
 
 # Initialize the graph database with graphiti's indices. This only needs to be done once.
-async def build_and_populate_graph(documents: List[Document]):
+async def build_and_populate_graph(documents: List[Document], with_communities: bool = True):
     # Build the graph structure in Neo4j using Graphiti
     await graphiti.build_indices_and_constraints()
 
@@ -88,9 +127,13 @@ async def build_and_populate_graph(documents: List[Document]):
             episode_body=episode['content'] if isinstance(episode['content'], str) else json.dumps(episode['content']),
             source=episode['type'],
             source_description=episode['description'],
+            group_id=episode['group_id'],
             reference_time=datetime.now(timezone.utc),
         )
         print(f'Added episode: Freakonomics Radio {i} ({episode["type"].value})')
+
+    if with_communities:
+        await graphiti.build_communities()
 
     
 
@@ -204,17 +247,10 @@ async def node_search_using_search_recipes(query: str):
 
 async def main():
     try:
-        # # Create a dummy LangChain Document
-        # dummy_document = Document(
-        #     page_content="Kamala Harris served as the California Attorney General.",
-        #     metadata={
-        #         "type": EpisodeType.text,
-        #         "description": "Fact about Kamala Harris's role in California."
-        #     }
-        # )
+        docs = read_json_files_from_directory_and_convert_to_documents("Documents")
 
-        # # Build and populate the graph with the dummy document
-        # await build_and_populate_graph([dummy_document])
+        # Build and populate the graph with the dummy document
+        await build_and_populate_graph(docs, with_communities=False)
 
         # Helper function to process search results into a list (for center_node_search)
         async def process_search_results(search_results):
